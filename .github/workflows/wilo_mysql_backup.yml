@@ -1,0 +1,52 @@
+name: Wilo Server - MySQL Backup
+
+defaults:
+  run:
+    shell: bash
+    working-directory: /
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  publishMySQLBackup:
+    name: Build MySQL Backup image
+    runs-on: [self-hosted, wilo-runner]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Docker login
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }} ${{ secrets.DOCKER_ECR }}
+
+      - name: Docker build
+        run: |
+          cd $GITHUB_WORKSPACE
+          docker build \
+            --tag ${{ secrets.DOCKER_ECR }}/${{ secrets.DOCKER_IMAGE_NAME }}:latest \
+            .
+
+      - name: Docker push
+        run: |
+          docker push ${{ secrets.DOCKER_ECR }}/${{ secrets.DOCKER_IMAGE_NAME }}:latest
+
+      - name: Docker logout
+        run: |
+          docker logout ${{ secrets.DOCKER_ECR }}
+
+  deployMySQLBackup:
+    name: Deploy MySQL Backup image
+    runs-on: [self-hosted, wilo-runner]
+    needs: [publishMySQLBackup]
+    steps:
+      - name: Rolling upgrade backup stack
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{secrets.WILO_SERVER_USERNAME}}@${{secrets.WILO_SERVER_HOST}} \
+            'cd ${{ secrets.WILO_SERVER_SERVICE_SQLBACKUP_PATH }} \
+            && docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }} ${{ secrets.DOCKER_ECR }} \
+            && docker compose down \
+            && docker compose pull \
+            && docker compose up -d \
+            && docker logout ${{ secrets.DOCKER_ECR }}'

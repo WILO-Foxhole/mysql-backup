@@ -454,8 +454,8 @@ function max_day_in_month() {
 function delete_old_backups() {
     if [[ -n "$DB_DUMP_ARCHIVE_DAYS_TO_KEEP" ]]; then
       echo Removing Archives older than $DB_DUMP_ARCHIVE_DAYS_TO_KEEP days
-      [[ "$DB_DUMP_DEBUG" != "0" ]] && find $DB_DUMP_TARGET -mtime +$DB_DUMP_ARCHIVE_DAYS_TO_KEEP -exec echo "removing {}" \;
-      find $DB_DUMP_TARGET -mtime +$DB_DUMP_ARCHIVE_DAYS_TO_KEEP -exec rm {} \;
+      smbclient -N "//${uri[host]}/${uri[share]}" ${UPASSARG} "${UPASS}" ${UDOM} -c \
+        "find ${uri[sharepath]} -mtime +$DB_DUMP_ARCHIVE_DAYS_TO_KEEP -exec echo "removing {}" \; find ${uri[sharepath]} -mtime +$DB_DUMP_ARCHIVE_DAYS_TO_KEEP -exec rm {}"
     fi
 }
 

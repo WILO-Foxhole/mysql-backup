@@ -1,3 +1,6 @@
+## WILO DISCLIMER
+Repository publicly used until the original fork is officially merged in [databacker/mysql-backup](https://github.com/databacker/mysql-backup).
+
 # mysql-backup
 Back up mysql databases to... anywhere!
 
