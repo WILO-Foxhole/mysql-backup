@@ -25,7 +25,7 @@ Support is available at the Slack channel https://slack.databack.io. We accept i
 ## Backup
 To run a backup, launch `mysql-backup` image as a container with the correct parameters. Everything is controlled by environment variables passed to the container.
 
-For example:
+For example :
 
 ````bash
 docker run -d --restart=always -e DB_DUMP_FREQ=60 -e DB_DUMP_BEGIN=2330 -e DB_DUMP_TARGET=/db -e DB_SERVER=my-db-container -v /local/file/path:/db databack/mysql-backup
